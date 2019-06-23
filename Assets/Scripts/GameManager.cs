@@ -2,43 +2,46 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Billiards
+public class GameManager : MonoBehaviour
 {
-    public class GameManager : MonoBehaviour
+    public Cue cueStick;
+    public int score = 0;
+
+    private Ball[] billiardBalls;
+    private bool isActive = false;
+
+    // Use this for initialization
+    void Start()
     {
-        public Cue cueStick;
+        billiardBalls = GetComponentsInChildren<Ball>();
+    }
 
-        private Ball[] billiardBalls;
-        private bool isActive = false;
-
-        // Use this for initialization
-        void Start()
+    // Update is called once per frame
+    void Update()
+    {
+        if (AllBallsStoppedMoving() &&
+           !cueStick.gameObject.activeSelf)
         {
-            billiardBalls = GetComponentsInChildren<Ball>();
+            cueStick.Activate();
         }
+    }
 
-        // Update is called once per frame
-        void Update()
+    bool AllBallsStoppedMoving()
+    {
+        for (int i = 0; i < billiardBalls.Length; i++)
         {
-            if(AllBallsStoppedMoving() && 
-               !cueStick.gameObject.activeSelf)
+            Ball currentBall = billiardBalls[i];
+            if (currentBall != null &&
+               !currentBall.IsStopped())
             {
-                cueStick.Activate();
+                return false;
             }
         }
+        return true;
+    }
 
-        bool AllBallsStoppedMoving()
-        {
-            for (int i = 0; i < billiardBalls.Length; i++)
-            {
-                Ball currentBall = billiardBalls[i];
-                if(currentBall != null && 
-                   !currentBall.IsStopped())
-                {
-                    return false;
-                } 
-            }
-            return true;
-        }
+    public void AddScore(int scoreToAdd)
+    {
+        score += scoreToAdd;
     }
 }
