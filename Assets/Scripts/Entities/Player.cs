@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Cue : MonoBehaviour
+public class Player : MonoBehaviour
 {
     public Ball targetBall; // Target ball selected (which is generally the Cue ball
-    public Transform stick;
-    public GameObject model;
+    public Transform cue;
     public float minPower = 0f; // The min power which maps to the distance
     public float maxPower = 20f;// The max power which maps to the distance
     public float maxDistance = 5f; //The maximum distance in units the cue can be dragged back
@@ -18,25 +17,28 @@ public class Cue : MonoBehaviour
     // Helps visualize the mouse ray and direction of fire
     private void OnDrawGizmos()
     {
-        Gizmos.color = Color.red;
-        Gizmos.DrawLine(mouseRay.origin, mouseRay.origin + mouseRay.direction * 1000f);
-        Gizmos.color = Color.blue;
-        Gizmos.DrawLine(targetBall.transform.position, targetBall.transform.position + stick.forward * hitPower);
-        Gizmos.color = Color.cyan;
-        Gizmos.DrawWireSphere(GetHitPoint(), .1f);
+        if (Application.isPlaying)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawLine(mouseRay.origin, mouseRay.origin + mouseRay.direction * 1000f);
+            Gizmos.color = Color.blue;
+            Gizmos.DrawLine(targetBall.transform.position, targetBall.transform.position + cue.forward * hitPower);
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawWireSphere(GetHitPoint(), .1f);
+        }
     }
 
     // Rotates the cue to wherever the mouse is pointing (using Raycast)
     void Aim()
     {
         // Obtain direction from the cue's position to the raycast's hit point
-        Vector3 dir = stick.transform.position - GetHitPoint();
+        Vector3 dir = cue.transform.position - GetHitPoint();
         // Convert direction to angle in degrees
         float angle = Mathf.Atan2(dir.x, dir.z) * Mathf.Rad2Deg;
         // Rotate towards that angle
-        stick.rotation = Quaternion.AngleAxis(angle, Vector3.up);
+        cue.rotation = Quaternion.AngleAxis(angle, Vector3.up);
         // Position cue to the ball's position
-        stick.position = targetBall.transform.position;
+        cue.position = targetBall.transform.position;
     }
 
     Vector3 GetHitPoint()
@@ -58,13 +60,13 @@ public class Cue : MonoBehaviour
     // Deactivates the Cue
     public void Deactivate()
     {
-        model.SetActive(false);
+        cue.gameObject.SetActive(false);
     }
 
     // Activates the Cue
     public void Activate()
     {
-        model.SetActive(true);
+        cue.gameObject.SetActive(true);
     }
 
     // Allows you to drag the cue back and calculates power dealt to the ball
@@ -83,14 +85,14 @@ public class Cue : MonoBehaviour
         // Store target ball's position in smaller variable
         Vector3 targetPos = targetBall.transform.position;
         // Position the cue back using distance
-        stick.position = targetPos + -model.transform.up * distance;
+        cue.position = targetPos + -cue.forward * distance;
     }
 
     // Fires off the ball
     void Fire()
     {
         // Hit the ball with direction and power
-        targetBall.Hit(stick.forward, hitPower);
+        targetBall.Hit(cue.forward, hitPower);
     }
 
     // Update is called once per frame
