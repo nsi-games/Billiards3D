@@ -47,7 +47,7 @@ public class Ball : MonoBehaviour
     // Checks if the magnitude is below the speed
     public bool IsStopped()
     {
-        return rigid.velocity.magnitude <= 0.2f;
+        return rigid.velocity.magnitude <= stopSpeed;
     }
 
     public void SetMaterial(int number)

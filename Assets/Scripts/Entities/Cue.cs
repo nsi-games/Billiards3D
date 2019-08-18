@@ -12,30 +12,31 @@ public class Cue : MonoBehaviour
     public float maxDistance = 5f; //The maximum distance in units the cue can be dragged back
 
     private float hitPower; // The final calculated hit power to fire the ball
-    private Vector3 aimDirection; // The aim direction the ball should fire
     private Vector3 prevMousePos; // The mouse position obtained when left-clicking
     private Ray mouseRay; // The ray of the mouse
 
     // Helps visualize the mouse ray and direction of fire
     private void OnDrawGizmos()
     {
+        Gizmos.color = Color.red;
         Gizmos.DrawLine(mouseRay.origin, mouseRay.origin + mouseRay.direction * 1000f);
         Gizmos.color = Color.blue;
-        Gizmos.DrawLine(targetBall.transform.position, targetBall.transform.position + aimDirection * hitPower);
+        Gizmos.DrawLine(targetBall.transform.position, targetBall.transform.position + stick.forward * hitPower);
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawWireSphere(GetHitPoint(), .1f);
     }
 
     // Rotates the cue to wherever the mouse is pointing (using Raycast)
     void Aim()
     {
         // Obtain direction from the cue's position to the raycast's hit point
-        Vector3 dir = transform.position - GetHitPoint();
+        Vector3 dir = stick.transform.position - GetHitPoint();
         // Convert direction to angle in degrees
         float angle = Mathf.Atan2(dir.x, dir.z) * Mathf.Rad2Deg;
         // Rotate towards that angle
         stick.rotation = Quaternion.AngleAxis(angle, Vector3.up);
         // Position cue to the ball's position
         stick.position = targetBall.transform.position;
-        print("I'm Rotating!");
     }
 
     Vector3 GetHitPoint()
@@ -63,7 +64,6 @@ public class Cue : MonoBehaviour
     // Activates the Cue
     public void Activate()
     {
-        Aim();
         model.SetActive(true);
     }
 
@@ -90,9 +90,7 @@ public class Cue : MonoBehaviour
     void Fire()
     {
         // Hit the ball with direction and power
-        targetBall.Hit(-aimDirection, hitPower);
-        // Deactivate the Cue when done
-        Deactivate();
+        targetBall.Hit(stick.forward, hitPower);
     }
 
     // Update is called once per frame
@@ -102,14 +100,16 @@ public class Cue : MonoBehaviour
         {
             Activate();
         }
+        else
+        {
+            Deactivate();
+        }
 
         // Check if left mouse button is pressed
         if (Input.GetMouseButtonDown(0))
         {
             // Store the click position as the 'prevMousePos'
             prevMousePos = GetHitPoint();
-            // Get direction to target ball
-            aimDirection = (prevMousePos - targetBall.transform.position).normalized;
         }
 
         // Check if left mouse button is pressed
